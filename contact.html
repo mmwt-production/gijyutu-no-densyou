@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>お問い合わせ | 技術の継承</title>
+<meta name="description" content="技術の継承へのお問い合わせフォームです。">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html">技術の継承</a>
+    <nav>
+      <a href="index.html">トップ</a>
+      <a href="contact.html">お問い合わせ</a>
+    </nav>
+  </div>
+</header>
+
+<section class="section" style="border-top:none;">
+  <div class="wrap" style="max-width:600px;">
+    <div class="eyebrow-line"></div>
+    <h1 style="font-size:1.9rem;">お問い合わせ</h1>
+    <p class="lede" style="margin-bottom:36px;">
+      アプリについてのご質問、ご感想、技術の継承へのご協力など、
+      どのようなことでもお気軽にお送りください。
+    </p>
+
+    <form id="contactForm" novalidate>
+      <div class="form-field">
+        <label for="name">お名前</label>
+        <input type="text" id="name" name="name" required autocomplete="name">
+      </div>
+
+      <div class="form-field">
+        <label for="email">メールアドレス</label>
+        <input type="email" id="email" name="email" required autocomplete="email">
+      </div>
+
+      <div class="form-field">
+        <label for="message">お問い合わせ内容</label>
+        <textarea id="message" name="message" required></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">送信する</button>
+      <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 技術の継承</span>
+    <span><a href="index.html" style="text-decoration:none;">トップへ</a></span>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+  // ▼ ここに、GASをデプロイした後に発行される「ウェブアプリのURL」を貼り付けてください
+  // 例: https://script.google.com/macros/s/xxxxxxxxxxxxxxxx/exec
+  const CONTACT_ENDPOINT = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+  const form = document.getElementById('contactForm');
+  const statusEl = document.getElementById('formStatus');
+  const submitBtn = document.getElementById('submitBtn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (!CONTACT_ENDPOINT || CONTACT_ENDPOINT.startsWith('PASTE_')) {
+      statusEl.textContent = '送信先が設定されていません。README.mdの手順に沿ってGoogle Apps ScriptのURLを設定してください。';
+      statusEl.className = 'form-status is-error';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    statusEl.textContent = '送信中です…';
+    statusEl.className = 'form-status';
+
+    const data = {
+      name: form.name.value,
+      email: form.email.value,
+      message: form.message.value,
+    };
+
+    try {
+      await fetch(CONTACT_ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors', // Google Apps Script Web App はレスポンスを読み取れないため no-cors で送信
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(data),
+      });
+
+      statusEl.textContent = 'お問い合わせを送信しました。ありがとうございます。';
+      statusEl.className = 'form-status is-success';
+      form.reset();
+    } catch (err) {
+      statusEl.textContent = '送信に失敗しました。時間をおいて再度お試しください。';
+      statusEl.className = 'form-status is-error';
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

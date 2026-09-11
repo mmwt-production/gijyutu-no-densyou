@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>色掛けの伝承 | 技術の継承</title>
+<meta name="description" content="染めと重ねの技法を体験しながら学ぶアプリ「色掛けの伝承」のご紹介。">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html">技術の継承</a>
+    <nav>
+      <a href="index.html">トップ</a>
+      <a href="contact.html">お問い合わせ</a>
+    </nav>
+  </div>
+</header>
+
+<section class="section" style="border-top:none;">
+  <div class="wrap">
+    <a class="back-link" href="index.html">‹ アプリ一覧にもどる</a>
+
+    <div class="app-hero">
+      <div>
+        <div class="eyebrow-line"></div>
+        <h1>色掛けの伝承</h1>
+        <p class="lede">
+          一色では出せない深さを、重ねることでつくる。
+          「色掛け」は、薄い色を幾度も重ねて奥行きを出す、日本の染め・彩色に
+          伝わる技法です。このアプリでは、実際の道具を持たなくても、
+          筆致と色の重なりを画面上で繰り返し稽古できます。
+        </p>
+
+        <ul class="spec-list">
+          <li><span class="k">形式</span><span class="v">ブラウザ / アプリで利用</span></li>
+          <li><span class="k">向いている方</span><span class="v">染色・彩色技術を学びたい方、稽古を積みたい職人志望の方</span></li>
+          <li><span class="k">利用の流れ</span><span class="v">アカウント登録 → お支払い確認 → 稽古を開始</span></li>
+        </ul>
+
+        <p style="margin-top:28px;">
+          <a class="btn btn-primary" id="appLink" href="#" rel="noopener">
+            色掛けの伝承をひらく ›
+          </a>
+        </p>
+        <p class="section-note" style="margin-top:10px; font-size:0.82rem;">
+          ※ 上のボタンから、アカウント名とパスワードの入力画面に進みます。
+        </p>
+      </div>
+
+      <div>
+        <div class="brush-canvas-wrap">
+          <canvas id="brushCanvas"></canvas>
+          <span class="hint">なぞって、色を重ねてみてください</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 技術の継承</span>
+    <span><a href="contact.html" style="text-decoration:none;">お問い合わせ</a></span>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/brush-hero.js"></script>
+<script>
+  // TODO: 実際のアプリ(ログイン画面)のURLに差し替えてください
+  document.getElementById('appLink').setAttribute('href', 'https://example.com/iro-kake/login');
+</script>
+</body>
+</html>
