@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>染み抜きの伝承 | 技術の伝承</title>
-<meta name="description" content="シミを見抜く目と落とし方を体験しながら学ぶアプリ「染み抜きの伝承」のご紹介。">
+<title>クリーニング売上管理システム | 技術の伝承</title>
+<meta name="description" content="タグ番号による工程管理を前提とした、クリーニング業向け売上管理・分析ダッシュボード「クリーニング売上管理システム」のご紹介。">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -23,37 +23,30 @@
   <div class="wrap">
     <a class="back-link" href="index.html">‹ アプリ一覧にもどる</a>
 
-    <div class="app-hero">
+    <div class="app-hero" style="grid-template-columns: 1fr;">
       <div>
         <div class="eyebrow-line"></div>
-        <h1>染み抜きの伝承</h1>
+        <h1>クリーニング売上管理システム</h1>
         <p class="lede">
-          ベテランの勘と経験だけに頼ってきた「シミを見抜く目」を、
-          一枚の写真から学べるように。染み抜きの伝承は、シミ抜きという
-          名の化学を、次の世代の手に渡すためのアプリです。
+          タグ番号による工程管理を前提とした、売上管理・分析ダッシュボード。
+          店舗別・商品カテゴリ別の売上比較や、工程ごとの滞留状況、
+          リピート顧客比率などを一画面で把握できます。
         </p>
 
         <ul class="spec-list">
-          <li><span class="k">形式</span><span class="v">ブラウザ / アプリで利用</span></li>
-          <li><span class="k">向いている方</span><span class="v">染み抜き技術を学びたい方、新人教育を担当する方</span></li>
-          <li><span class="k">利用の流れ</span><span class="v">アカウント登録 → 稽古を開始（現在無料でご利用いただけます）</span></li>
+          <li><span class="k">形式</span><span class="v">ブラウザで利用</span></li>
+          <li><span class="k">向いている方</span><span class="v">クリーニング店の売上・工程を可視化したい経営者、店舗管理者の方</span></li>
+          <li><span class="k">利用の流れ</span><span class="v">アカウント登録 → ダッシュボードを開始（現在無料でご利用いただけます）</span></li>
         </ul>
 
         <p style="margin-top:28px;">
           <a class="btn btn-primary" id="appLink" href="#" rel="noopener">
-            染み抜きの伝承をひらく ›
+            クリーニング売上管理システムをひらく ›
           </a>
         </p>
         <p class="section-note" style="margin-top:10px; font-size:0.82rem;">
           ※ 上のボタンから、アカウント名とパスワードの入力画面に進みます。現在は無料でお試しいただけます。
         </p>
-      </div>
-
-      <div>
-        <div class="brush-canvas-wrap">
-          <canvas id="stainCanvas"></canvas>
-          <span class="hint">なぞって、シミを落としてみてください</span>
-        </div>
       </div>
     </div>
   </div>
@@ -67,9 +60,8 @@
 </footer>
 
 <script src="js/main.js"></script>
-<script src="js/stain-hero.js"></script>
 <script>
-  document.getElementById('appLink').setAttribute('href', 'https://shiminuki.streamlit.app');
+  document.getElementById('appLink').setAttribute('href', 'https://tokomara007.pythonanywhere.com/');
 </script>
 </body>
 </html>
