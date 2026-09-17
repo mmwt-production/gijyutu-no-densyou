@@ -1,4 +1,4 @@
-// トップページのカルーセル(横スクロール)の矢印操作
+// トップページのカルーセル(横スクロール)の矢印操作 + 自動再生
 (function () {
   const track = document.getElementById('carouselTrack');
   const prevBtn = document.getElementById('prevBtn');
@@ -6,13 +6,67 @@
 
   if (!track || !prevBtn || !nextBtn) return;
 
-  const scrollByCard = (direction) => {
+  const GAP = 24;
+  const AUTOPLAY_MS = 4200;
+  const RESUME_DELAY_MS = 6000;
+  const EDGE_MARGIN = 4;
+
+  const cardStep = () => {
     const card = track.querySelector('.app-card');
-    const gap = 24;
-    const distance = card ? card.getBoundingClientRect().width + gap : 320;
-    track.scrollBy({ left: direction * distance, behavior: 'smooth' });
+    return card ? card.getBoundingClientRect().width + GAP : 320;
   };
 
-  prevBtn.addEventListener('click', () => scrollByCard(-1));
-  nextBtn.addEventListener('click', () => scrollByCard(1));
+  const atEnd = () => track.scrollLeft + track.clientWidth >= track.scrollWidth - EDGE_MARGIN;
+  const atStart = () => track.scrollLeft <= EDGE_MARGIN;
+
+  // 端まで来たら反対側へ折り返し、そうでなければ1枚分スクロールする
+  const scrollByCard = (direction) => {
+    if (direction > 0 && atEnd()) {
+      track.scrollTo({ left: 0, behavior: 'smooth' });
+    } else if (direction < 0 && atStart()) {
+      track.scrollTo({ left: track.scrollWidth, behavior: 'smooth' });
+    } else {
+      track.scrollBy({ left: direction * cardStep(), behavior: 'smooth' });
+    }
+  };
+
+  let autoplayTimer = null;
+  let resumeTimer = null;
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const stopAutoplay = () => {
+    if (autoplayTimer) clearInterval(autoplayTimer);
+    autoplayTimer = null;
+  };
+
+  const startAutoplay = () => {
+    if (prefersReducedMotion) return;
+    stopAutoplay();
+    autoplayTimer = setInterval(() => scrollByCard(1), AUTOPLAY_MS);
+  };
+
+  // 手動操作の直後はしばらく自動再生を止め、一定時間後に再開する
+  const pauseAutoplay = () => {
+    stopAutoplay();
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(startAutoplay, RESUME_DELAY_MS);
+  };
+
+  prevBtn.addEventListener('click', () => {
+    scrollByCard(-1);
+    pauseAutoplay();
+  });
+  nextBtn.addEventListener('click', () => {
+    scrollByCard(1);
+    pauseAutoplay();
+  });
+
+  track.addEventListener('mouseenter', stopAutoplay);
+  track.addEventListener('mouseleave', startAutoplay);
+  track.addEventListener('touchstart', stopAutoplay, { passive: true });
+  track.addEventListener('touchend', pauseAutoplay, { passive: true });
+  track.addEventListener('focusin', stopAutoplay);
+  track.addEventListener('focusout', startAutoplay);
+
+  startAutoplay();
 })();
