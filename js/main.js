@@ -32,15 +32,14 @@
 
   let autoplayTimer = null;
   let resumeTimer = null;
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const stopAutoplay = () => {
     if (autoplayTimer) clearInterval(autoplayTimer);
     autoplayTimer = null;
   };
 
+  // OSの「アニメーションを減らす」設定に関わらず、常に自動再生する
   const startAutoplay = () => {
-    if (prefersReducedMotion) return;
     stopAutoplay();
     autoplayTimer = setInterval(() => scrollByCard(1), AUTOPLAY_MS);
   };
