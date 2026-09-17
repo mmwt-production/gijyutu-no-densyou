@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>診断・判定ノート | 技術の伝承</title>
+<meta name="description" content="水洗い可否判定、生地判定(繊維鑑定)、事故品・クレーム対応をまとめた診断・判定リファレンス。">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+  :root{
+    --ink:#211d1a;
+    --ink-soft:#5c554c;
+    --bg:#f6f2e9;
+    --surface:#fffdf9;
+    --surface-2:#eee6d6;
+    --line:#ddd0b8;
+    --steel:#3f5560;
+    --steam:#6f97a8;
+    --steam-soft:#dfeaee;
+    --heat:#b85c2f;
+    --heat-soft:#f3ddc9;
+    --good:#4f7a54;
+    --good-soft:#e2ead9;
+    --warn:#a8862f;
+    --warn-soft:#f1e6c9;
+    --shadow: 0 1px 2px rgba(33,29,26,.06), 0 8px 20px -12px rgba(33,29,26,.18);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', sans-serif;
+    line-height:1.7;
+    padding-inline:16px;
+  }
+  img{max-width:100%;}
+  .wrap{max-width:860px; margin:0 auto; padding-block:20px 64px;}
+
+  h1,h2,h3{font-family:'Shippori Mincho', serif; font-weight:600; text-wrap:balance; margin:0;}
+
+  .dn-back{
+    display:inline-block; margin-bottom:20px; font-size:.88rem;
+    color:var(--ink-soft); text-decoration:none;
+  }
+  .dn-back:hover{ color:var(--steel); }
+
+  header.top{
+    display:flex; flex-direction:column; gap:6px; margin-bottom:20px;
+  }
+  .eyebrow{
+    font-size:.72rem; letter-spacing:.18em; color:var(--steam); font-weight:700;
+    text-transform:uppercase;
+  }
+  header.top h1{font-size:clamp(1.6rem,5vw,2.15rem); color:var(--ink);}
+  header.top p{margin:2px 0 0; color:var(--ink-soft); font-size:.92rem; max-width:56ch;}
+
+  nav.tabs{
+    position:sticky; top:0;
+    display:flex; gap:4px; background:var(--bg);
+    border-bottom:1px solid var(--line); padding-block:10px 0;
+    margin-bottom:24px; z-index:10; overflow-x:auto;
+  }
+  nav.tabs button{
+    appearance:none; border:none; background:none; cursor:pointer;
+    font-family:inherit; font-size:.88rem; font-weight:700; color:var(--ink-soft);
+    padding:8px 14px 12px; border-bottom:2px solid transparent; white-space:nowrap;
+  }
+  nav.tabs button.active{color:var(--steel); border-color:var(--heat);}
+  nav.tabs button:focus-visible, .chip:focus-visible{outline:2px solid var(--heat); outline-offset:2px;}
+
+  section.panel{display:none;}
+  section.panel.active{display:block;}
+
+  /* --- 水洗い可否判定 --- */
+  .flow-grid{display:grid; gap:18px;}
+  .flow-group h3{font-size:.95rem; color:var(--ink-soft); font-family:'Zen Kaku Gothic New',sans-serif; font-weight:700; margin-bottom:8px;}
+  .chips{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    appearance:none; cursor:pointer; font-family:inherit; font-size:.85rem; font-weight:500;
+    padding:8px 14px; border-radius:999px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink);
+  }
+  .chip.sel{background:var(--steel); border-color:var(--steel); color:var(--surface); font-weight:700;}
+
+  .result{
+    margin-top:22px; background:var(--surface); border:1px solid var(--line);
+    border-radius:14px; box-shadow:var(--shadow); overflow:hidden;
+  }
+  .result-head{
+    padding:16px 18px; background:var(--surface-2);
+    display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap;
+  }
+  .result-head h3{font-size:1.05rem;}
+  .method-badge{
+    display:inline-block; font-size:.85rem; font-weight:700; padding:3px 11px; border-radius:999px;
+  }
+  .method-ok{background:var(--good-soft); color:var(--good);}
+  .method-caution{background:var(--heat-soft); color:var(--heat);}
+  .method-stop{background:var(--warn-soft); color:var(--warn);}
+  .result-body{ padding:14px 18px; font-size:.9rem; }
+  .result-body p{ margin:0 0 10px; }
+  .result-body p:last-child{ margin-bottom:0; }
+  .result-note{
+    border-top:1px solid var(--line); padding:14px 18px; font-size:.88rem; background:var(--steam-soft);
+  }
+  .result-note b{color:var(--steel);}
+
+  /* --- 生地判定(繊維鑑定) --- */
+  .stage{
+    display:grid; grid-template-columns:auto 1fr; gap:14px;
+    border-top:1px solid var(--line); padding-block:18px;
+  }
+  .stage:last-child{border-bottom:1px solid var(--line);}
+  .stage-num{
+    font-family:'Shippori Mincho',serif; font-size:1.6rem;
+    -webkit-text-stroke:1px var(--steam); color:transparent;
+    width:2.2ch;
+  }
+  .stage-head{display:flex; align-items:center; gap:12px; cursor:pointer;}
+  .stage-icon{
+    width:38px; height:38px; flex:none; border-radius:50%;
+    background:var(--steam-soft); display:grid; place-items:center; color:var(--steel);
+  }
+  .stage-icon svg{width:20px; height:20px;}
+  .stage-title{font-family:'Shippori Mincho',serif; font-size:1.15rem; font-weight:600;}
+  .stage-sub{font-size:.82rem; color:var(--ink-soft); margin-top:1px;}
+  .stage-toggle{margin-left:auto; color:var(--ink-soft); font-size:.8rem; flex:none;}
+  .stage-body{
+    overflow:hidden; max-height:0; transition:max-height .25s ease;
+  }
+  .stage.open .stage-body{max-height:600px;}
+  .stage-body-inner{padding-top:14px;}
+  .stage ul{margin:0; padding-left:1.1em; display:grid; gap:8px;}
+  .stage li{font-size:.92rem;}
+  .stage li b{color:var(--steel);}
+  .warn{
+    margin-top:12px; display:flex; gap:8px; align-items:flex-start;
+    background:var(--heat-soft); border:1px solid rgba(184,92,47,.4);
+    padding:10px 12px; border-radius:8px; font-size:.85rem; color:var(--ink);
+  }
+  .warn b{color:var(--heat);}
+
+  /* --- 事故品・クレーム対応 --- */
+  .cases{display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+  .case-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    box-shadow:var(--shadow); padding:16px; display:flex; flex-direction:column; gap:10px;
+  }
+  .case-num{font-size:.72rem; letter-spacing:.12em; color:var(--heat); font-weight:700;}
+  .case-card h3{font-size:1.05rem;}
+  .case-card dl{margin:0; display:grid; gap:8px;}
+  .case-card dt{font-size:.76rem; font-weight:700; color:var(--ink-soft); letter-spacing:.04em;}
+  .case-card dd{margin:2px 0 0; font-size:.88rem;}
+
+  .dn-footer{
+    margin-top:44px; padding-top:16px; border-top:1px solid var(--line);
+    font-size:.78rem; color:var(--ink-soft); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .dn-footer a{ color:inherit; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="dn-back" href="diagnosis.html">‹ アプリ紹介にもどる</a>
+
+  <header class="top">
+    <span class="eyebrow">職人技の伝承ノート — 診断・判定</span>
+    <h1>診断・判定ノート</h1>
+    <p>「洗えるか、洗えないか」「この繊維は何か」「なぜこうなったのか」——ベテランが一瞬で判断してきた勘所を、次の担当者が同じように見極められるように残す。</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="active" data-tab="wash">水洗い可否判定</button>
+    <button data-tab="fiber">生地判定(繊維鑑定)</button>
+    <button data-tab="claim">事故品・クレーム対応</button>
+  </nav>
+
+  <!-- ============ 水洗い可否判定 ============ -->
+  <section class="panel active" id="panel-wash">
+    <div class="flow-grid">
+      <div class="flow-group">
+        <h3>1. 素材を選ぶ</h3>
+        <div class="chips" id="material-chips"></div>
+      </div>
+      <div class="flow-group">
+        <h3>2. 気になる状態・構造を選ぶ</h3>
+        <div class="chips" id="condition-chips"></div>
+      </div>
+    </div>
+
+    <div class="result">
+      <div class="result-head">
+        <h3 id="result-title">—</h3>
+        <span class="method-badge" id="result-method">—</span>
+      </div>
+      <div class="result-body" id="result-body"></div>
+      <div class="result-note" id="result-note"></div>
+    </div>
+  </section>
+
+  <!-- ============ 生地判定(繊維鑑定) ============ -->
+  <section class="panel" id="panel-fiber">
+
+    <div class="stage open" data-stage>
+      <div class="stage-num">01</div>
+      <div>
+        <div class="stage-head" data-stage-head>
+          <span class="stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+          <div>
+            <div class="stage-title">見た目で見る</div>
+            <div class="stage-sub">光沢・織り目・均一性</div>
+          </div>
+          <span class="stage-toggle">閉じる ▲</span>
+        </div>
+        <div class="stage-body">
+          <div class="stage-body-inner">
+            <ul>
+              <li><b>光沢</b>:シルクは柔らかく上品な光沢、ポリエステル・アセテートは均一で強い人工的な光沢が出やすい。</li>
+              <li><b>織り目の粗さ</b>:麻は繊維の節が目立ちやすく、綿は比較的均一。天然繊維ほど太さにばらつきが出る。</li>
+              <li><b>色の均一性</b>:天然繊維は染めムラが微妙に残ることがあるが、化学繊維は非常に均一に発色する傾向がある。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage" data-stage>
+      <div class="stage-num">02</div>
+      <div>
+        <div class="stage-head" data-stage-head>
+          <span class="stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12c0-4 3-7 5-7s5 3 5 7-3 7-5 7-5-3-5-7Z"/><path d="M5 12h2M17 12h2"/></svg></span>
+          <div>
+            <div class="stage-title">触ってみる</div>
+            <div class="stage-sub">しなやかさ・弾力・温冷感</div>
+          </div>
+          <span class="stage-toggle">開く ▼</span>
+        </div>
+        <div class="stage-body">
+          <div class="stage-body-inner">
+            <ul>
+              <li><b>温冷感</b>:シルクや麻は触れた瞬間ひんやりと感じ、ウールは温かみを感じる。</li>
+              <li><b>弾力</b>:ウールは指で押すとすぐに戻る弾力があり、レーヨンはへたって戻りにくい。</li>
+              <li><b>しなやかさ</b>:化学繊維はコシが強くパリッとした感触、天然繊維は繊維ごとに柔らかさが異なる。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage" data-stage>
+      <div class="stage-num">03</div>
+      <div>
+        <div class="stage-head" data-stage-head>
+          <span class="stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c0 6-5 6-5 11a5 5 0 0 0 10 0c0-5-5-5-5-11Z"/></svg></span>
+          <div>
+            <div class="stage-title">燃焼試験で確かめる</div>
+            <div class="stage-sub">端切れの糸を使った最終確認</div>
+          </div>
+          <span class="stage-toggle">開く ▼</span>
+        </div>
+        <div class="stage-body">
+          <div class="stage-body-inner">
+            <ul>
+              <li><b>天然繊維(綿・麻・ウール・シルク)</b>:炎に近づけるとよく燃え、髪の毛が焦げるような匂いがして、灰はサラサラと崩れる。</li>
+              <li><b>化学繊維(ポリエステル・アセテート等)</b>:溶けながら縮れて丸まり、プラスチックが焦げるような匂いがする。灰は硬い玉になる。</li>
+              <li><b>レーヨン・キュプラ</b>:紙が燃えるように素早く燃え、燃えた跡がほとんど残らない。</li>
+            </ul>
+            <div class="warn"><b>注意:</b> 必ず商品本体ではなく、内側の縫い代など見えない部分の端切れ糸で行う。判断がつかない場合は無理に試さない。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage" data-stage>
+      <div class="stage-num">04</div>
+      <div>
+        <div class="stage-head" data-stage-head>
+          <span class="stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2"/></svg></span>
+          <div>
+            <div class="stage-title">迷ったときは</div>
+            <div class="stage-sub">表示タグの確認と試し洗い</div>
+          </div>
+          <span class="stage-toggle">開く ▼</span>
+        </div>
+        <div class="stage-body">
+          <div class="stage-body-inner">
+            <ul>
+              <li><b>表示タグ優先</b>:組成表示があれば、見た目・触感の判断よりも表示を優先する。</li>
+              <li><b>混紡には注意</b>:「綿65%・ポリエステル35%」のように混紡の場合は、より弱い方の繊維(この例では綿)を基準に扱う。</li>
+              <li><b>それでも迷う場合</b>:目立たない部分で少量の試し洗いを行い、変化がないか確認してから本洗いに進む。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============ 事故品・クレーム対応 ============ -->
+  <section class="panel" id="panel-claim">
+    <div class="cases">
+
+      <div class="case-card">
+        <span class="case-num">CASE 01</span>
+        <h3>縮み</h3>
+        <dl>
+          <div><dt>原因</dt><dd>水分・摩擦・熱の組み合わせで繊維が収縮する。レーヨン・ウール・混紡素材で起きやすい。</dd></div>
+          <div><dt>対処</dt><dd>スチームを当てながら生地を軽く引っ張って伸ばす。完全には戻らないことがあるため、着手前に状態を写真で記録しておく。</dd></div>
+        </dl>
+      </div>
+
+      <div class="case-card">
+        <span class="case-num">CASE 02</span>
+        <h3>色泣き・色移り</h3>
+        <dl>
+          <div><dt>原因</dt><dd>染色堅牢度が低い濃色部分の染料が、水分中で白地や淡色部分ににじみ出る。</dd></div>
+          <div><dt>対処</dt><dd>移った染料の除去を試みるが、生地の地色まで脱色するリスクがあるため、必ず目立たない部分で試してから進める。</dd></div>
+        </dl>
+      </div>
+
+      <div class="case-card">
+        <span class="case-num">CASE 03</span>
+        <h3>風合い変化(硬化・ゴワつき)</h3>
+        <dl>
+          <div><dt>原因</dt><dd>乾燥仕上げの熱や、洗剤・糊剤の残留により生地が硬くなる。</dd></div>
+          <div><dt>対処</dt><dd>柔軟剤を使った再仕上げプレスで風合いを戻す。素材によっては完全には戻らないことを事前に伝える。</dd></div>
+        </dl>
+      </div>
+
+      <div class="case-card">
+        <span class="case-num">CASE 04</span>
+        <h3>黄変・変色</h3>
+        <dl>
+          <div><dt>原因</dt><dd>保管中の酸化や、汗汚れが時間経過とともに酸化して黄色く浮き出る。</dd></div>
+          <div><dt>対処</dt><dd>還元系の漂白剤でのシミ抜きを検討する。進行度合いによっては完全に消えない場合があることを説明する。</dd></div>
+        </dl>
+      </div>
+
+      <div class="case-card">
+        <span class="case-num">CASE 05</span>
+        <h3>型崩れ・プレス跡</h3>
+        <dl>
+          <div><dt>原因</dt><dd>誤った温度設定や、プレス後の放冷不足による変形・テカリ。</dd></div>
+          <div><dt>対処</dt><dd>再度スチームを当てて生地を柔らかくし、正しい方向に形を戻す。テカリは当て布で軽くこすって目立たなくする。</dd></div>
+        </dl>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="dn-footer">
+    <span>クリーニング現場の職人技術を、次の担当者へ。</span>
+    <span><a href="index.html">技術の伝承 トップへ</a></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---- tabs ----
+  var tabs = document.querySelectorAll('nav.tabs button');
+  var panels = { wash: document.getElementById('panel-wash'), fiber: document.getElementById('panel-fiber'), claim: document.getElementById('panel-claim') };
+  tabs.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabs.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.keys(panels).forEach(function(k){ panels[k].classList.remove('active'); });
+      panels[btn.dataset.tab].classList.add('active');
+    });
+  });
+
+  // ---- accordion stages ----
+  document.querySelectorAll('[data-stage-head]').forEach(function(head){
+    head.addEventListener('click', function(){
+      var stage = head.closest('[data-stage]');
+      var wasOpen = stage.classList.contains('open');
+      stage.classList.toggle('open');
+      head.querySelector('.stage-toggle').textContent = wasOpen ? '開く ▼' : '閉じる ▲';
+    });
+  });
+
+  // ---- wash-check data ----
+  var materials = [
+    { id:'cotton_linen', label:'綿・麻', method:'ok', methodLabel:'ウェットクリーニング可',
+      body:'水に強く、比較的丈夫な繊維。ただし濃色は色泣き、先染め柄は色移りが起きやすいので単品洗いを基本にする。' },
+    { id:'wool', label:'ウール', method:'caution', methodLabel:'ドライクリーニング推奨',
+      body:'水分と摩擦でフェルト化(縮絨)しやすい。ウェットクリーニングを行う場合は専用洗剤・低速脱水が必須。' },
+    { id:'silk', label:'シルク', method:'caution', methodLabel:'ドライ推奨・水洗いは要相談',
+      body:'水じみ・変色・風合い変化が起きやすい。汗抜き目的で水洗いする場合は必ず目立たない部分で試してから進める。' },
+    { id:'synthetic', label:'ポリエステル等化学繊維', method:'ok', methodLabel:'ウェットクリーニング可',
+      body:'水に強く型崩れしにくい素材。ただし熱には弱いので、乾燥・プレスの温度設定に注意する。' },
+    { id:'rayon', label:'レーヨン・キュプラ', method:'caution', methodLabel:'ドライクリーニング推奨',
+      body:'濡れると強度が大きく落ち、縮み・型崩れが起きやすい。表示にレーヨン・キュプラとあれば水洗いは避ける。' },
+    { id:'fur_leather', label:'毛皮・皮革・スエード', method:'stop', methodLabel:'水洗い厳禁・専門業者へ',
+      body:'一般のクリーニングでは対応できないことが多い。無理に扱わず、専門クリーニングへの回付を検討する。' }
+  ];
+
+  var conditions = [
+    { id:'normal', label:'特に問題なし', note:'' },
+    { id:'interlining', label:'芯地(接着芯)使用', note:'水洗いで接着芯が浮く・剥離することがある。ウェット系は避け、ドライクリーニングを優先する。' },
+    { id:'lining', label:'裏地あり・素材の重ね', note:'表地と裏地で収縮率が違うと、水洗い後に生地がつれる(風船状になる)ことがある。' },
+    { id:'trim', label:'ビーズ・スパンコール等の装飾', note:'接着剤の劣化・変色・脱落のおそれがあるため、部分手洗いや当て布プレスへの切り替えを検討する。' },
+    { id:'unstable', label:'型崩れ・寸法安定性が不安', note:'判断に迷う場合は無理をせず、小さく目立たない部分で試し洗いをしてから本洗いに進む。' }
+  ];
+
+  var selMaterial = 'cotton_linen';
+  var selCondition = 'normal';
+
+  function renderChips(containerId, data, selectedId, onPick){
+    var el = document.getElementById(containerId);
+    el.innerHTML = '';
+    data.forEach(function(item){
+      var b = document.createElement('button');
+      b.className = 'chip' + (item.id === selectedId ? ' sel' : '');
+      b.textContent = item.label;
+      b.addEventListener('click', function(){ onPick(item.id); });
+      el.appendChild(b);
+    });
+  }
+
+  function update(){
+    renderChips('material-chips', materials, selMaterial, function(id){ selMaterial = id; update(); });
+    renderChips('condition-chips', conditions, selCondition, function(id){ selCondition = id; update(); });
+
+    var m = materials.find(function(x){ return x.id === selMaterial; });
+    var c = conditions.find(function(x){ return x.id === selCondition; });
+
+    document.getElementById('result-title').textContent = m.label;
+    var badge = document.getElementById('result-method');
+    badge.textContent = m.methodLabel;
+    badge.className = 'method-badge method-' + m.method;
+
+    document.getElementById('result-body').innerHTML = '<p>' + m.body + '</p>';
+
+    var noteEl = document.getElementById('result-note');
+    if (c.note) {
+      noteEl.hidden = false;
+      noteEl.innerHTML = '<b>' + c.label + 'の注意点:</b> ' + c.note;
+    } else {
+      noteEl.hidden = false;
+      noteEl.innerHTML = '<b>状態の補足:</b> 特に追加の注意点はありません。';
+    }
+  }
+
+  update();
+})();
+</script>
+</body>
+</html>
