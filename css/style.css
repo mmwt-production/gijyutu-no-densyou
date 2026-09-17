@@ -201,15 +201,12 @@ img {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   padding-bottom: 8px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--gold) transparent;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .carousel-track::-webkit-scrollbar {
-  height: 6px;
-}
-.carousel-track::-webkit-scrollbar-thumb {
-  background: var(--gold);
+  display: none;
 }
 
 .app-card {
