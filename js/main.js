@@ -7,7 +7,7 @@
   if (!track || !prevBtn || !nextBtn) return;
 
   const GAP = 24;
-  const AUTOPLAY_MS = 4200;
+  const AUTOPLAY_MS = 3000;
   const RESUME_DELAY_MS = 6000;
   const EDGE_MARGIN = 4;
 
