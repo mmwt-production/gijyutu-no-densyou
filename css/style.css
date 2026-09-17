@@ -213,7 +213,8 @@ img {
 }
 
 .app-card {
-  flex: 0 0 min(360px, 82vw);
+  flex: 0 0 calc((100% - 24px) / 2);
+  min-width: 240px;
   scroll-snap-align: start;
   border: 1px solid var(--line);
   background: var(--paper-dark);
@@ -261,6 +262,12 @@ img {
 
 .app-card.is-soon:hover {
   border-color: var(--line);
+}
+
+@media (max-width: 620px) {
+  .app-card {
+    flex-basis: 100%;
+  }
 }
 
 .carousel-nav {
