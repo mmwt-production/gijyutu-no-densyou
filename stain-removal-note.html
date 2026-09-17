@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>シミ抜き技術ノート | 技術の伝承</title>
+<meta name="description" content="シミ抜きの工程別手順ガイド、シミ種類・素材ごとの判定フローチャート、技のポイントをまとめたリファレンス。">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+  :root{
+    --ink:#211d1a;
+    --ink-soft:#5c554c;
+    --bg:#f6f2e9;
+    --surface:#fffdf9;
+    --surface-2:#eee6d6;
+    --line:#ddd0b8;
+    --steel:#3f5560;
+    --steam:#6f97a8;
+    --steam-soft:#dfeaee;
+    --heat:#b85c2f;
+    --heat-soft:#f3ddc9;
+    --good:#4f7a54;
+    --good-soft:#e2ead9;
+    --warn:#a8862f;
+    --warn-soft:#f1e6c9;
+    --shadow: 0 1px 2px rgba(33,29,26,.06), 0 8px 20px -12px rgba(33,29,26,.18);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', sans-serif;
+    line-height:1.7;
+    padding-inline:16px;
+  }
+  img{max-width:100%;}
+  .wrap{max-width:860px; margin:0 auto; padding-block:20px 64px;}
+
+  h1,h2,h3{font-family:'Shippori Mincho', serif; font-weight:600; text-wrap:balance; margin:0;}
+
+  .dn-back{
+    display:inline-block; margin-bottom:20px; font-size:.88rem;
+    color:var(--ink-soft); text-decoration:none;
+  }
+  .dn-back:hover{ color:var(--steel); }
+
+  header.top{
+    display:flex; flex-direction:column; gap:6px; margin-bottom:20px;
+  }
+  .eyebrow{
+    font-size:.72rem; letter-spacing:.18em; color:var(--steam); font-weight:700;
+    text-transform:uppercase;
+  }
+  header.top h1{font-size:clamp(1.6rem,5vw,2.15rem); color:var(--ink);}
+  header.top p{margin:2px 0 0; color:var(--ink-soft); font-size:.92rem; max-width:56ch;}
+
+  nav.tabs{
+    position:sticky; top:0;
+    display:flex; gap:4px; background:var(--bg);
+    border-bottom:1px solid var(--line); padding-block:10px 0;
+    margin-bottom:24px; z-index:10; overflow-x:auto;
+  }
+  nav.tabs button{
+    appearance:none; border:none; background:none; cursor:pointer;
+    font-family:inherit; font-size:.88rem; font-weight:700; color:var(--ink-soft);
+    padding:8px 14px 12px; border-bottom:2px solid transparent; white-space:nowrap;
+  }
+  nav.tabs button.active{color:var(--steel); border-color:var(--heat);}
+  nav.tabs button:focus-visible, .chip:focus-visible{outline:2px solid var(--heat); outline-offset:2px;}
+
+  section.panel{display:none;}
+  section.panel.active{display:block;}
+
+  /* --- 手順ガイド --- */
+  .stage{
+    display:grid; grid-template-columns:auto 1fr; gap:14px;
+    border-top:1px solid var(--line); padding-block:18px;
+  }
+  .stage:last-child{border-bottom:1px solid var(--line);}
+  .stage-num{
+    font-family:'Shippori Mincho',serif; font-size:1.6rem;
+    -webkit-text-stroke:1px var(--steam); color:transparent;
+    width:2.2ch;
+  }
+  .stage-head{display:flex; align-items:center; gap:12px; cursor:pointer;}
+  .stage-icon{
+    width:38px; height:38px; flex:none; border-radius:50%;
+    background:var(--steam-soft); display:grid; place-items:center; color:var(--steel);
+  }
+  .stage-icon svg{width:20px; height:20px;}
+  .stage-title{font-family:'Shippori Mincho',serif; font-size:1.15rem; font-weight:600;}
+  .stage-sub{font-size:.82rem; color:var(--ink-soft); margin-top:1px;}
+  .stage-toggle{margin-left:auto; color:var(--ink-soft); font-size:.8rem; flex:none;}
+  .stage-body{
+    overflow:hidden; max-height:0; transition:max-height .25s ease;
+  }
+  .stage.open .stage-body{max-height:600px;}
+  .stage-body-inner{padding-top:14px;}
+  .stage ul{margin:0; padding-left:1.1em; display:grid; gap:8px;}
+  .stage li{font-size:.92rem;}
+  .stage li b{color:var(--steel);}
+  .warn{
+    margin-top:12px; display:flex; gap:8px; align-items:flex-start;
+    background:var(--heat-soft); border:1px solid rgba(184,92,47,.4);
+    padding:10px 12px; border-radius:8px; font-size:.85rem; color:var(--ink);
+  }
+  .warn b{color:var(--heat);}
+
+  /* --- シミ種類・素材判定 --- */
+  .flow-grid{display:grid; gap:18px;}
+  .flow-group h3{font-size:.95rem; color:var(--ink-soft); font-family:'Zen Kaku Gothic New',sans-serif; font-weight:700; margin-bottom:8px;}
+  .chips{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    appearance:none; cursor:pointer; font-family:inherit; font-size:.85rem; font-weight:500;
+    padding:8px 14px; border-radius:999px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink);
+  }
+  .chip.sel{background:var(--steel); border-color:var(--steel); color:var(--surface); font-weight:700;}
+
+  .result{
+    margin-top:22px; background:var(--surface); border:1px solid var(--line);
+    border-radius:14px; box-shadow:var(--shadow); overflow:hidden;
+  }
+  .result-head{
+    padding:16px 18px; background:var(--surface-2);
+    display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap;
+  }
+  .result-head h3{font-size:1.05rem;}
+  .method-badge{
+    display:inline-block; font-size:.85rem; font-weight:700; padding:3px 11px; border-radius:999px;
+  }
+  .method-ok{background:var(--good-soft); color:var(--good);}
+  .method-caution{background:var(--heat-soft); color:var(--heat);}
+  .method-stop{background:var(--warn-soft); color:var(--warn);}
+  .result-body{ padding:14px 18px; font-size:.9rem; }
+  .result-body p{ margin:0; }
+  .result-note{
+    border-top:1px solid var(--line); padding:14px 18px; font-size:.88rem; background:var(--steam-soft);
+  }
+  .result-note b{color:var(--steel);}
+
+  /* --- 技のポイント --- */
+  .tips{display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+  .tip-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    box-shadow:var(--shadow); padding:16px; display:flex; flex-direction:column; gap:10px;
+  }
+  .tip-diagram{
+    aspect-ratio:4/3; background:var(--surface-2); border-radius:10px;
+    display:grid; place-items:center; padding:10px;
+  }
+  .tip-diagram svg{width:100%; height:100%; max-width:180px; color:var(--steel);}
+  .tip-num{font-size:.72rem; letter-spacing:.12em; color:var(--heat); font-weight:700;}
+  .tip-card h3{font-size:1rem;}
+  .tip-card p{margin:0; font-size:.85rem; color:var(--ink-soft);}
+
+  .dn-footer{
+    margin-top:44px; padding-top:16px; border-top:1px solid var(--line);
+    font-size:.78rem; color:var(--ink-soft); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .dn-footer a{ color:inherit; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="dn-back" href="stain-removal.html">‹ アプリ紹介にもどる</a>
+
+  <header class="top">
+    <span class="eyebrow">職人技の伝承ノート — シミ抜き</span>
+    <h1>シミ抜き技術ノート</h1>
+    <p>シミは「何が」「いつ」ついたかで対処が変わる——シミ抜きは化学と経験の勝負。シミの見分け方と処理の勘所を、次の担当者が迷わないように残す。</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="active" data-tab="guide">工程別 手順ガイド</button>
+    <button data-tab="flow">シミ種類・素材判定</button>
+    <button data-tab="tips">技のポイント</button>
+  </nav>
+
+  <!-- ============ 手順ガイド ============ -->
+  <section class="panel active" id="panel-guide">
+
+    <div class="stage open" data-stage>
+      <div class="stage-num">01</div>
+      <div>
+        <div class="stage-head" data-stage-head>
+          <span class="stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6"/><line x1="15" y1="15" x2="20" y2="20"/></svg></span>
+          <div>
+            <div class="stage-title">シミの特定</div>
+            <div class="stage-sub">水溶性・油性・不溶性の見極め</div>
+          </div>
+          <span class="stage-toggle">閉じる ▲</span>
+        </div>
+        <div class="stage-body">
+          <div class="stage-body-inner">
+            <ul>
+              <li><b>種類の見極め</b>:色・光沢・手触りから、水溶性(飲食物)/油性(皮脂・化粧品)/タンパク質系(血液・卵)などを判断する。</li>
+              <li><b>経過時間の確認</b>:いつ付いたシミかをできる限り聞き取る。新しいシミほど落ちやすい。</li>
+              <li><b>変色との違い</b>:シミと経年による変色(黄変等)は処理法が異なるため、混同しないよう注意する。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage" data-stage>
+      <div class="stage-num">02</div>
+      <div>
+        <div class="stage-head" data-stage-head>
+          <span class="stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 L15 18 L19 12 L15 6 L6 6 Z"/><line x1="7" y1="18" x2="7" y2="21"/><line x1="13" y1="18" x2="13" y2="21"/></svg></span>
+          <div>
+            <div class="stage-title">前処理</div>
+            <div class="stage-sub">固形分の除去・薬剤選定・テスト</div>
+          </div>
+          <span class="stage-toggle">開く ▼</span>
+        </div>
+        <div class="stage-body">
+          <div class="stage-body-inner">
+            <ul>
+              <li><b>固形分を先に除く</b>:ブラシや刃物で、乾いた汚れや粒状の付着物を先に取り除いておく。</li>
+              <li><b>薬剤の選定</b>:シミの種類に合わせて薬剤を選ぶ(詳しくは「シミ種類・素材判定」タブを参照)。</li>
+              <li><b>目立たない部分でテスト</b>:必ず縫い代などで薬剤の影響(変色・風合い変化)がないか確認してから本処理に入る。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage" data-stage>
+      <div class="stage-num">03</div>
+      <div>
+        <div class="stage-head" data-stage-head>
+          <span class="stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></span>
+          <div>
+            <div class="stage-title">しみ抜き作業</div>
+            <div class="stage-sub">叩き出し・当て布・輪染み防止</div>
+          </div>
+          <span class="stage-toggle">開く ▼</span>
+        </div>
+        <div class="stage-body">
+          <div class="stage-body-inner">
+            <ul>
+              <li><b>叩き出し</b>:下に当て布を敷き、シミを下へ移すイメージで軽く叩く。こすらない。</li>
+              <li><b>中心から外側へ</b>:シミの中心から外側に向けて処理することで、輪染みの広がりを防ぐ。</li>
+              <li><b>少しずつ確認</b>:一気に薬剤を使いすぎず、様子を見ながら段階的に進める。</li>
+            </ul>
+            <div class="warn"><b>注意:</b> タンパク質系のシミ(血液・卵・乳製品等)に熱いお湯を使うと、タンパク質が固まって逆に落ちにくくなる。必ず水かぬるま湯から始める。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage" data-stage>
+      <div class="stage-num">04</div>
+      <div>
+        <div class="stage-head" data-stage-head>
+          <span class="stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 v4 M9 5 a3 3 0 0 1 6 0"/><path d="M6 8 h12 l-1.4 11.2a1.6 1.6 0 0 1-1.6 1.4H9a1.6 1.6 0 0 1-1.6-1.4Z"/></svg></span>
+          <div>
+            <div class="stage-title">仕上げ確認</div>
+            <div class="stage-sub">乾燥後のチェック・再処理判断</div>
+          </div>
+          <span class="stage-toggle">開く ▼</span>
+        </div>
+        <div class="stage-body">
+          <div class="stage-body-inner">
+            <ul>
+              <li><b>乾燥後に確認</b>:シミは乾くと見え方が変わるため、完全に乾かしてから色・風合いを確認する。</li>
+              <li><b>再処理の判断</b>:薄く残っている場合は、無理をせず段階を分けて再処理する。一度に落とそうとしない。</li>
+              <li><b>周囲への影響確認</b>:処理した部分としていない部分で、色や光沢に差が出ていないか確認する。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============ シミ種類・素材判定 ============ -->
+  <section class="panel" id="panel-flow">
+    <div class="flow-grid">
+      <div class="flow-group">
+        <h3>1. シミの種類を選ぶ</h3>
+        <div class="chips" id="stain-chips"></div>
+      </div>
+      <div class="flow-group">
+        <h3>2. 素材を選ぶ</h3>
+        <div class="chips" id="material-chips"></div>
+      </div>
+    </div>
+
+    <div class="result">
+      <div class="result-head">
+        <h3 id="result-title">—</h3>
+        <span class="method-badge" id="result-method">—</span>
+      </div>
+      <div class="result-body" id="result-body"></div>
+      <div class="result-note" id="result-note"></div>
+    </div>
+  </section>
+
+  <!-- ============ 技のポイント ============ -->
+  <section class="panel" id="panel-tips">
+    <div class="tips">
+
+      <div class="tip-card">
+        <div class="tip-diagram">
+          <svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="60" cy="45" r="30"/>
+            <circle cx="60" cy="45" r="18" opacity="0.5"/>
+            <circle cx="60" cy="45" r="6" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+        <span class="tip-num">POINT 01</span>
+        <h3>中心から外側へ</h3>
+        <p>シミの中心から外側に向かって処理することで、輪染みが広がるのを防ぐ。外から中心に向かうと逆効果になる。</p>
+      </div>
+
+      <div class="tip-card">
+        <div class="tip-diagram">
+          <svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M60 15 C 40 40, 40 55, 60 70 C 80 55, 80 40, 60 15 Z"/>
+            <line x1="30" y1="20" x2="40" y2="30" stroke="var(--heat)"/>
+            <line x1="90" y1="20" x2="80" y2="30" stroke="var(--heat)"/>
+          </svg>
+        </div>
+        <span class="tip-num">POINT 02</span>
+        <h3>熱を先に加えない</h3>
+        <p>タンパク質系のシミは熱で固まり、かえって落ちにくくなる。必ず水またはぬるま湯から試す。</p>
+      </div>
+
+      <div class="tip-card">
+        <div class="tip-diagram">
+          <svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="20" y="55" width="30" height="20" rx="2"/>
+            <path d="M35 55 L35 30" stroke-dasharray="3 4"/>
+            <circle cx="35" cy="24" r="6"/>
+          </svg>
+        </div>
+        <span class="tip-num">POINT 03</span>
+        <h3>テスト当てを必ず行う</h3>
+        <p>薬剤の影響は素材ごとに異なる。縫い代など目立たない部分で試してから、本処理に進む。</p>
+      </div>
+
+      <div class="tip-card">
+        <div class="tip-diagram">
+          <svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="60" cy="45" r="28"/>
+            <path d="M60 30v15l10 8"/>
+          </svg>
+        </div>
+        <span class="tip-num">POINT 04</span>
+        <h3>新しいシミほど有利</h3>
+        <p>時間が経つほど繊維の奥まで入り込み、落ちにくくなる。気づいたらできるだけ早く対応するのが鉄則。</p>
+      </div>
+
+      <div class="tip-card">
+        <div class="tip-diagram">
+          <svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="20" y="20" width="80" height="15" rx="2"/>
+            <rect x="30" y="45" width="60" height="30" rx="2" opacity="0.5"/>
+          </svg>
+        </div>
+        <span class="tip-num">POINT 05</span>
+        <h3>当て布で下に移す</h3>
+        <p>叩き出しの基本は、シミを下に敷いた布に移すこと。こすって表面に広げるのではなく、下方向へ抜く意識を持つ。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="dn-footer">
+    <span>クリーニング現場の職人技術を、次の担当者へ。</span>
+    <span><a href="index.html">技術の伝承 トップへ</a></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---- tabs ----
+  var tabs = document.querySelectorAll('nav.tabs button');
+  var panels = { guide: document.getElementById('panel-guide'), flow: document.getElementById('panel-flow'), tips: document.getElementById('panel-tips') };
+  tabs.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabs.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.keys(panels).forEach(function(k){ panels[k].classList.remove('active'); });
+      panels[btn.dataset.tab].classList.add('active');
+    });
+  });
+
+  // ---- accordion stages ----
+  document.querySelectorAll('[data-stage-head]').forEach(function(head){
+    head.addEventListener('click', function(){
+      var stage = head.closest('[data-stage]');
+      var wasOpen = stage.classList.contains('open');
+      stage.classList.toggle('open');
+      head.querySelector('.stage-toggle').textContent = wasOpen ? '開く ▼' : '閉じる ▲';
+    });
+  });
+
+  // ---- stain-check data ----
+  var stainTypes = [
+    { id:'water', label:'水溶性(醤油・コーヒー・ジュース等)', method:'ok', methodLabel:'温水+中性洗剤で対応可',
+      body:'比較的落としやすいシミ。ただし時間が経つと色素が繊維に定着してしまうため、乾く前の早めの対応が重要。' },
+    { id:'oil', label:'油性(皮脂・口紅・食用油等)', method:'caution', methodLabel:'溶剤処理が必要',
+      body:'ベンジン等の溶剤で油分を浮かせてから、洗剤で仕上げる。周囲ににじみやすいため輪染み対策をしながら進める。' },
+    { id:'protein', label:'タンパク質系(血液・卵・乳製品等)', method:'caution', methodLabel:'水・ぬるま湯から開始',
+      body:'熱を加えると固まって落ちにくくなる。必ず水またはぬるま湯から始め、専用酵素系の薬剤を使うと効果的。' },
+    { id:'special', label:'特殊(墨・カビ・サビ等)', method:'stop', methodLabel:'一般処理では対応困難',
+      body:'一般的なしみ抜き処理では落としきれないことが多い。専門的な薬剤・技術が必要になるため、無理に進めず慎重に判断する。' }
+  ];
+
+  var materials = [
+    { id:'cotton_linen', label:'綿・麻', note:'水洗い系の処理に強く、特に追加の注意点は少ない。' },
+    { id:'wool', label:'ウール', note:'摩擦でフェルト化しやすい。専用洗剤を薄めて使い、こすらず叩くように処理する。' },
+    { id:'silk', label:'シルク', note:'水じみ・退色が起きやすい。必ず目立たない部分でテストしてから進める。' },
+    { id:'synthetic', label:'ポリエステル等化学繊維', note:'熱に弱いため、乾燥・プレスの温度設定に注意する。' }
+  ];
+
+  var selStain = 'water';
+  var selMaterial = 'cotton_linen';
+
+  function renderChips(containerId, data, selectedId, onPick){
+    var el = document.getElementById(containerId);
+    el.innerHTML = '';
+    data.forEach(function(item){
+      var b = document.createElement('button');
+      b.className = 'chip' + (item.id === selectedId ? ' sel' : '');
+      b.textContent = item.label;
+      b.addEventListener('click', function(){ onPick(item.id); });
+      el.appendChild(b);
+    });
+  }
+
+  function update(){
+    renderChips('stain-chips', stainTypes, selStain, function(id){ selStain = id; update(); });
+    renderChips('material-chips', materials, selMaterial, function(id){ selMaterial = id; update(); });
+
+    var s = stainTypes.find(function(x){ return x.id === selStain; });
+    var m = materials.find(function(x){ return x.id === selMaterial; });
+
+    document.getElementById('result-title').textContent = s.label;
+    var badge = document.getElementById('result-method');
+    badge.textContent = s.methodLabel;
+    badge.className = 'method-badge method-' + s.method;
+
+    document.getElementById('result-body').innerHTML = '<p>' + s.body + '</p>';
+    document.getElementById('result-note').innerHTML = '<b>' + m.label + 'の注意点:</b> ' + m.note;
+  }
+
+  update();
+})();
+</script>
+</body>
+</html>

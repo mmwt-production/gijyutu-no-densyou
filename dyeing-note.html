@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>色重ね技術ノート | 技術の伝承</title>
+<meta name="description" content="色重ね(色掛け)の工程別手順ガイド、素材・色調ごとの判定フローチャート、技のポイントをまとめたリファレンス。">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+  :root{
+    --ink:#211d1a;
+    --ink-soft:#5c554c;
+    --bg:#f6f2e9;
+    --surface:#fffdf9;
+    --surface-2:#eee6d6;
+    --line:#ddd0b8;
+    --steel:#3f5560;
+    --steam:#6f97a8;
+    --steam-soft:#dfeaee;
+    --heat:#b85c2f;
+    --heat-soft:#f3ddc9;
+    --good:#4f7a54;
+    --good-soft:#e2ead9;
+    --shadow: 0 1px 2px rgba(33,29,26,.06), 0 8px 20px -12px rgba(33,29,26,.18);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', sans-serif;
+    line-height:1.7;
+    padding-inline:16px;
+  }
+  img{max-width:100%;}
+  .wrap{max-width:860px; margin:0 auto; padding-block:20px 64px;}
+
+  h1,h2,h3{font-family:'Shippori Mincho', serif; font-weight:600; text-wrap:balance; margin:0;}
+
+  .dn-back{
+    display:inline-block; margin-bottom:20px; font-size:.88rem;
+    color:var(--ink-soft); text-decoration:none;
+  }
+  .dn-back:hover{ color:var(--steel); }
+
+  header.top{
+    display:flex; flex-direction:column; gap:6px; margin-bottom:20px;
+  }
+  .eyebrow{
+    font-size:.72rem; letter-spacing:.18em; color:var(--steam); font-weight:700;
+    text-transform:uppercase;
+  }
+  header.top h1{font-size:clamp(1.6rem,5vw,2.15rem); color:var(--ink);}
+  header.top p{margin:2px 0 0; color:var(--ink-soft); font-size:.92rem; max-width:56ch;}
+
+  nav.tabs{
+    position:sticky; top:0;
+    display:flex; gap:4px; background:var(--bg);
+    border-bottom:1px solid var(--line); padding-block:10px 0;
+    margin-bottom:24px; z-index:10; overflow-x:auto;
+  }
+  nav.tabs button{
+    appearance:none; border:none; background:none; cursor:pointer;
+    font-family:inherit; font-size:.88rem; font-weight:700; color:var(--ink-soft);
+    padding:8px 14px 12px; border-bottom:2px solid transparent; white-space:nowrap;
+  }
+  nav.tabs button.active{color:var(--steel); border-color:var(--heat);}
+  nav.tabs button:focus-visible, .chip:focus-visible{outline:2px solid var(--heat); outline-offset:2px;}
+
+  section.panel{display:none;}
+  section.panel.active{display:block;}
+
+  /* --- 手順ガイド --- */
+  .stage{
+    display:grid; grid-template-columns:auto 1fr; gap:14px;
+    border-top:1px solid var(--line); padding-block:18px;
+  }
+  .stage:last-child{border-bottom:1px solid var(--line);}
+  .stage-num{
+    font-family:'Shippori Mincho',serif; font-size:1.6rem;
+    -webkit-text-stroke:1px var(--steam); color:transparent;
+    width:2.2ch;
+  }
+  .stage-head{display:flex; align-items:center; gap:12px; cursor:pointer;}
+  .stage-icon{
+    width:38px; height:38px; flex:none; border-radius:50%;
+    background:var(--steam-soft); display:grid; place-items:center; color:var(--steel);
+  }
+  .stage-icon svg{width:20px; height:20px;}
+  .stage-title{font-family:'Shippori Mincho',serif; font-size:1.15rem; font-weight:600;}
+  .stage-sub{font-size:.82rem; color:var(--ink-soft); margin-top:1px;}
+  .stage-toggle{margin-left:auto; color:var(--ink-soft); font-size:.8rem; flex:none;}
+  .stage-body{
+    overflow:hidden; max-height:0; transition:max-height .25s ease;
+  }
+  .stage.open .stage-body{max-height:600px;}
+  .stage-body-inner{padding-top:14px;}
+  .stage ul{margin:0; padding-left:1.1em; display:grid; gap:8px;}
+  .stage li{font-size:.92rem;}
+  .stage li b{color:var(--steel);}
+  .warn{
+    margin-top:12px; display:flex; gap:8px; align-items:flex-start;
+    background:var(--heat-soft); border:1px solid rgba(184,92,47,.4);
+    padding:10px 12px; border-radius:8px; font-size:.85rem; color:var(--ink);
+  }
+  .warn b{color:var(--heat);}
+
+  /* --- 判定フローチャート --- */
+  .flow-grid{display:grid; gap:18px;}
+  .flow-group h3{font-size:.95rem; color:var(--ink-soft); font-family:'Zen Kaku Gothic New',sans-serif; font-weight:700; margin-bottom:8px;}
+  .chips{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    appearance:none; cursor:pointer; font-family:inherit; font-size:.85rem; font-weight:500;
+    padding:8px 14px; border-radius:999px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink);
+  }
+  .chip.sel{background:var(--steel); border-color:var(--steel); color:var(--surface); font-weight:700;}
+
+  .result{
+    margin-top:22px; background:var(--surface); border:1px solid var(--line);
+    border-radius:14px; box-shadow:var(--shadow); overflow:hidden;
+  }
+  .result-head{
+    padding:16px 18px; background:var(--surface-2);
+    display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap;
+  }
+  .result-head h3{font-size:1.05rem;}
+  .result-head span{font-size:.78rem; color:var(--ink-soft);}
+  .result-rows{display:grid;}
+  .result-row{
+    display:grid; grid-template-columns:110px 1fr; gap:12px;
+    padding:12px 18px; border-top:1px solid var(--line); font-size:.88rem;
+  }
+  .result-row dt{color:var(--ink-soft); font-weight:700;}
+  .result-row dd{margin:0;}
+  .tone-note{
+    padding:14px 18px; border-top:1px solid var(--line); font-size:.88rem; background:var(--steam-soft);
+  }
+  .tone-note b{color:var(--steel);}
+
+  /* --- 技のポイント --- */
+  .tips{display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+  .tip-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    box-shadow:var(--shadow); padding:16px; display:flex; flex-direction:column; gap:10px;
+  }
+  .tip-diagram{
+    aspect-ratio:4/3; background:var(--surface-2); border-radius:10px;
+    display:grid; place-items:center; padding:10px;
+  }
+  .tip-diagram svg{width:100%; height:100%; max-width:180px; color:var(--steel);}
+  .tip-num{font-size:.72rem; letter-spacing:.12em; color:var(--heat); font-weight:700;}
+  .tip-card h3{font-size:1rem;}
+  .tip-card p{margin:0; font-size:.85rem; color:var(--ink-soft);}
+
+  .dn-footer{
+    margin-top:44px; padding-top:16px; border-top:1px solid var(--line);
+    font-size:.78rem; color:var(--ink-soft); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .dn-footer a{ color:inherit; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="dn-back" href="dyeing.html">‹ アプリ紹介にもどる</a>
+
+  <header class="top">
+    <span class="eyebrow">職人技の伝承ノート — 色重ね</span>
+    <h1>色重ね技術ノート</h1>
+    <p>色が部分的に落ちた箇所に、薄い色を少しずつ重ねて周囲となじませる——色重ね(色掛け)は、一度に決めず「重ねて近づける」技術。色合わせと筆致の勘所を、次の担当者が迷わないように残す。</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="active" data-tab="guide">工程別 手順ガイド</button>
+    <button data-tab="flow">素材・色調判定</button>
+    <button data-tab="tips">技のポイント</button>
+  </nav>
+
+  <!-- ============ 手順ガイド ============ -->
+  <section class="panel active" id="panel-guide">
+
+    <div class="stage open" data-stage>
+      <div class="stage-num">01</div>
+      <div>
+        <div class="stage-head" data-stage-head>
+          <span class="stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6"/><line x1="15" y1="15" x2="20" y2="20"/></svg></span>
+          <div>
+            <div class="stage-title">退色箇所の確認</div>
+            <div class="stage-sub">色落ちの範囲・素材の吸色性の見極め</div>
+          </div>
+          <span class="stage-toggle">閉じる ▲</span>
+        </div>
+        <div class="stage-body">
+          <div class="stage-body-inner">
+            <ul>
+              <li><b>範囲の確認</b>:色が抜けている境界を明るい場所でなぞり、どこまでがぼかし対象かを先に決めておく。</li>
+              <li><b>素材の吸色性</b>:同じ染料でも素材によって入り方が違う。目立たない部分に試し差しして、入り方を確かめる。</li>
+              <li><b>色見本との照合</b>:周囲の生地の色を色見本帳と付き合わせ、狙う色番を決めておく。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage" data-stage>
+      <div class="stage-num">02</div>
+      <div>
+        <div class="stage-head" data-stage-head>
+          <span class="stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><circle cx="12" cy="16" r="3"/></svg></span>
+          <div>
+            <div class="stage-title">色合わせ・調色</div>
+            <div class="stage-sub">染料の選定と少量でのテスト</div>
+          </div>
+          <span class="stage-toggle">開く ▼</span>
+        </div>
+        <div class="stage-body">
+          <div class="stage-body-inner">
+            <ul>
+              <li><b>染料の選定</b>:素材に定着しやすい染料タイプを選ぶ(詳しくは「素材・色調判定」タブを参照)。</li>
+              <li><b>少量から調色</b>:狙う色番より一段薄めに調色し、重ねながら近づける前提で作る。最初から濃く作らない。</li>
+              <li><b>試し差し</b>:端切れや目立たない部分に一度置いて、乾いた後の色を確認してから本番に進む。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage" data-stage>
+      <div class="stage-num">03</div>
+      <div>
+        <div class="stage-head" data-stage-head>
+          <span class="stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20 L14 10 a2.8 2.8 0 0 0 -4 -4 L 4 16 Z"/><path d="M14 10 L18 14"/></svg></span>
+          <div>
+            <div class="stage-title">色を差す(色重ね)</div>
+            <div class="stage-sub">細筆・タンポでの重ね塗り</div>
+          </div>
+          <span class="stage-toggle">開く ▼</span>
+        </div>
+        <div class="stage-body">
+          <div class="stage-body-inner">
+            <ul>
+              <li><b>薄く、何度も</b>:一度に色を決めようとせず、薄く差しては乾かし、様子を見ながら重ねる。</li>
+              <li><b>際をぼかす</b>:境界線をくっきり作らず、タンポで外側へ向けてぼかしながら周囲となじませる。</li>
+              <li><b>乾かしてから重ねる</b>:生乾きの上に重ねると色がにじみ、むしろ境界が目立ってしまう。</li>
+            </ul>
+            <div class="warn"><b>注意:</b> 焦って一度に濃く入れると、修正が効かなくなる。「戻れる範囲」で少しずつ進めるのが鉄則。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage" data-stage>
+      <div class="stage-num">04</div>
+      <div>
+        <div class="stage-head" data-stage-head>
+          <span class="stage-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 L15 18 L19 12 L15 6 L6 6 Z"/><line x1="7" y1="18" x2="7" y2="21"/><line x1="13" y1="18" x2="13" y2="21"/></svg></span>
+          <div>
+            <div class="stage-title">定着・仕上げ</div>
+            <div class="stage-sub">乾燥・スチーム定着・検品</div>
+          </div>
+          <span class="stage-toggle">開く ▼</span>
+        </div>
+        <div class="stage-body">
+          <div class="stage-body-inner">
+            <ul>
+              <li><b>完全乾燥</b>:定着処理の前に必ず完全に乾かす。生乾きでの加熱はムラや変色の原因になる。</li>
+              <li><b>定着</b>:当て布ごしにスチーム・アイロンで定着させ、染料を生地に固定する。</li>
+              <li><b>最終検品</b>:自然光・室内灯の両方で周囲との色差を確認し、必要であれば軽く重ねて微調整する。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============ 素材・色調判定 ============ -->
+  <section class="panel" id="panel-flow">
+    <div class="flow-grid">
+      <div class="flow-group">
+        <h3>1. 素材を選ぶ</h3>
+        <div class="chips" id="material-chips"></div>
+      </div>
+      <div class="flow-group">
+        <h3>2. 色系統を選ぶ</h3>
+        <div class="chips" id="tone-chips"></div>
+      </div>
+    </div>
+
+    <div class="result">
+      <div class="result-head">
+        <h3 id="result-title">—</h3>
+        <span id="result-sub">推奨アプローチ</span>
+      </div>
+      <dl class="result-rows" id="result-rows"></dl>
+      <div class="tone-note" id="tone-note"></div>
+    </div>
+  </section>
+
+  <!-- ============ 技のポイント ============ -->
+  <section class="panel" id="panel-tips">
+    <div class="tips">
+
+      <div class="tip-card">
+        <div class="tip-diagram">
+          <svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="40" cy="45" r="18" opacity="0.4"/>
+            <circle cx="55" cy="45" r="18" opacity="0.65"/>
+            <circle cx="70" cy="45" r="18"/>
+          </svg>
+        </div>
+        <span class="tip-num">POINT 01</span>
+        <h3>少量ずつ重ねる</h3>
+        <p>一度に濃く入れると引き返せない。薄く差しては乾かし、様子を見ながら段階的に近づける。</p>
+      </div>
+
+      <div class="tip-card">
+        <div class="tip-diagram">
+          <svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="45" cy="45" r="22"/>
+            <path d="M20 20 L30 30 M70 20 L60 30" stroke-width="1.6"/>
+            <path d="M90 30 Q100 45 90 60" stroke="var(--steam)"/>
+          </svg>
+        </div>
+        <span class="tip-num">POINT 02</span>
+        <h3>2種類の光で確認する</h3>
+        <p>自然光と室内の照明では、同じ色でも見え方が変わる。両方の光の下で色味を確認してから仕上げに入る。</p>
+      </div>
+
+      <div class="tip-card">
+        <div class="tip-diagram">
+          <svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 65 Q45 20 90 30" stroke-dasharray="1 7" stroke-width="4"/>
+          </svg>
+        </div>
+        <span class="tip-num">POINT 03</span>
+        <h3>際(きわ)をぼかす</h3>
+        <p>境界線をくっきり作らず、タンポで外側に向けて色をぼかしながら周囲になじませる。</p>
+      </div>
+
+      <div class="tip-card">
+        <div class="tip-diagram">
+          <svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M25 70 L60 70 L85 45 L60 20 L35 20 Z"/>
+            <text x="46" y="50" font-size="11" fill="var(--heat)" stroke="none" font-family="sans-serif">乾</text>
+          </svg>
+        </div>
+        <span class="tip-num">POINT 04</span>
+        <h3>完全乾燥してから定着</h3>
+        <p>生乾きの状態で熱を加えるとムラや変色の原因になる。焦らず乾き切るのを待つ。</p>
+      </div>
+
+      <div class="tip-card">
+        <div class="tip-diagram">
+          <svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="20" y="20" width="80" height="50" rx="4"/>
+            <line x1="20" y1="35" x2="100" y2="35" stroke-width="1.2"/>
+            <line x1="20" y1="50" x2="100" y2="50" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <span class="tip-num">POINT 05</span>
+        <h3>色見本帳を常に横に</h3>
+        <p>記憶や感覚だけに頼らず、色見本帳と照合しながら進めることで、仕上がりのブレを防ぐ。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="dn-footer">
+    <span>クリーニング現場の職人技術を、次の担当者へ。</span>
+    <span><a href="index.html">技術の伝承 トップへ</a></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---- tabs ----
+  var tabs = document.querySelectorAll('nav.tabs button');
+  var panels = { guide: document.getElementById('panel-guide'), flow: document.getElementById('panel-flow'), tips: document.getElementById('panel-tips') };
+  tabs.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabs.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.keys(panels).forEach(function(k){ panels[k].classList.remove('active'); });
+      panels[btn.dataset.tab].classList.add('active');
+    });
+  });
+
+  // ---- accordion stages ----
+  document.querySelectorAll('[data-stage-head]').forEach(function(head){
+    head.addEventListener('click', function(){
+      var stage = head.closest('[data-stage]');
+      var wasOpen = stage.classList.contains('open');
+      stage.classList.toggle('open');
+      head.querySelector('.stage-toggle').textContent = wasOpen ? '開く ▼' : '閉じる ▲';
+    });
+  });
+
+  // ---- flowchart data ----
+  var materials = [
+    { id:'cotton', label:'綿', dye:'直接染料・反応染料系', note:'吸色性が高く、色が入りやすい素材。定着も比較的安定している。' },
+    { id:'synthetic', label:'ポリエステル等化学繊維', dye:'油性タッチアップ剤・顔料系', note:'一般染料は定着しにくい。専用のタッチアップ剤や顔料系の補色剤を使う。' },
+    { id:'wool', label:'ウール', dye:'酸性染料系', note:'酸性染料が定着しやすいが、熱を加えすぎるとフェルト化するので温度管理に注意。' },
+    { id:'silk', label:'シルク', dye:'酸性染料系(薄めに)', note:'水分・熱で光沢や風合いが変わりやすい。一段薄めに調色し、重ねながら近づける。' },
+    { id:'rayon', label:'レーヨン・混紡', dye:'素材ごとに複数回に分けて', note:'成分によって染料の入り方が異なりムラが出やすい。少量ずつ、複数回に分けて重ねる。' }
+  ];
+
+  var tones = [
+    { id:'black_navy', label:'黒・濃紺系', note:'色合わせの誤差自体は目立ちにくいが、光の当たり方で色味が変わって見えるため、複数の光源で必ず確認する。' },
+    { id:'red', label:'赤・臙脂系', note:'色相のわずかなズレ(黄みが強い/青みが強い)が目立ちやすい。調色の最終段階は特に慎重に。' },
+    { id:'pastel', label:'淡色・パステル系', note:'少量の染料でも一気に濃く入ってしまう。一滴単位で足しながら様子を見る。' },
+    { id:'pattern', label:'特殊色・柄物', note:'柄の境界をまたがないよう気をつける。際をぼかす技術がいつも以上に重要になる。' }
+  ];
+
+  var selMaterial = 'cotton';
+  var selTone = 'black_navy';
+
+  function renderChips(containerId, data, selectedId, onPick){
+    var el = document.getElementById(containerId);
+    el.innerHTML = '';
+    data.forEach(function(item){
+      var b = document.createElement('button');
+      b.className = 'chip' + (item.id === selectedId ? ' sel' : '');
+      b.textContent = item.label;
+      b.addEventListener('click', function(){ onPick(item.id); });
+      el.appendChild(b);
+    });
+  }
+
+  function update(){
+    renderChips('material-chips', materials, selMaterial, function(id){ selMaterial = id; update(); });
+    renderChips('tone-chips', tones, selTone, function(id){ selTone = id; update(); });
+
+    var m = materials.find(function(x){ return x.id === selMaterial; });
+    var t = tones.find(function(x){ return x.id === selTone; });
+
+    document.getElementById('result-title').textContent = m.label + ' × ' + t.label;
+
+    var rows = document.getElementById('result-rows');
+    rows.innerHTML =
+      '<div class="result-row"><dt>推奨染料</dt><dd>' + m.dye + '</dd></div>' +
+      '<div class="result-row"><dt>素材の勘所</dt><dd>' + m.note + '</dd></div>';
+
+    document.getElementById('tone-note').innerHTML = '<b>' + t.label + 'の注意点:</b> ' + t.note;
+  }
+
+  update();
+})();
+</script>
+</body>
+</html>
